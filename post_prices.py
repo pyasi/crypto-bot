@@ -1,89 +1,51 @@
 from configparser import ConfigParser
-from coincap import CoinCap
-import requests
-import json
+from crypto_bot import CryptoBot
+from flask import Flask, jsonify, request
 
-AVAILABLE_CURRENCIES = ['usd', 'eur', 'btc', 'ltc', 'zec', 'eth']
-
-class SlackBot(object):
-
-    def __init__(self, webhook_url, currency='usd'):
-        self.webhook_url = webhook_url
-        self.coincap = CoinCap()
-        if currency.lower() in AVAILABLE_CURRENCIES:
-            self.currency = currency.lower()
-        else:
-            # Fallback to USD
-            self.currency = 'usd'
-
-    def _post_slack_message(self, payload, channel='#test-bot'):
-        """Post message to a slack channel
-        :param string webhook_url: required webhook url to use
-        :param string msg: Message to post
-        :param string channel: Optional channel to post to (by default will use webhook's) Should be full channel '#example' or '@username'
-        """
-        if channel:
-            payload['channel'] = channel
-        else:
-            print('oops')
-        requests.post(self.webhook_url, json=payload)
-
-    def _create_coin_post(self):
-        """
-
-        """
-        coin = self.coincap.get_coin_detail('ETH')
-        print(coin)
-        payload = {}
-        payload['attachments'] = [self._create_attachment_with_coin_details(coin)]
-        self._post_slack_message(payload)
-
-    def _create_top_coins_post(self):
-        """
-        """
+# Instantiate our Node
+app = Flask(__name__)
 
 
-    def _create_attachment_with_coin_details(self, coin):
-        """
-        """
-        attachment = {
-            'fallback': '{}, current price: {}, 24 hour change: {}'.format(
-                coin['display_name'], coin['price_' + self.currency], coin['cap24hrChange']),
-            'color': '#008000' if coin['cap24hrChange'] > 0 else '#FF0000',
-            'title': coin['display_name'],
-            'fields': [
-                {
-                    'title': 'Current Price',
-                    'value': coin['price_' + self.currency],
-                    'short': 'false'
-                },
-                {
-                    'title': '24 Hour Change',
-                    'value': coin['cap24hrChange'],
-                    'short': 'false'
-                }
-                    ],
-            'ts': 123456789
-            }
+# Configure Slack Bot
+config = ConfigParser()
+config.read('config.ini')
+slack_webhook_url = config['slack']['webhook_url']
 
-        return attachment
+# Instantiate the Blockchain
+slack_bot = CryptoBot(slack_webhook_url)
+
+@app.route('/mentions', methods=['POST'])
+def respond_to_mentions():
+    print(request)
+    values = request.get_json()
+
+    print(values['event']['text'])
+
+    #if 'help' in values['event']['text']:
+
+    return jsonify(values), 200
 
 
+@app.route('/coin', methods=['POST', 'GET'])
+def send_coin_information():
+    """
+    Slack slash command to get details for a specific coin.
+    Command expects a coin ticker value
+    :return:
+    """
+    command = request.form.get('command', None)
+    text = request.form.get('text', None)
 
-    def post(self):
-        """
-
-        """
-        self._create_coin_post()
-
-
-def main():
-    config = ConfigParser()
-    config.read('config.ini')
-    slack_webhook_url = config['slack']['webhook_url']
-    bot = SlackBot(slack_webhook_url)
-    bot.post()
-
+    response = slack_bot.handle_request(text.upper())
+    print('about to send {}'.format(response))
+    return jsonify(response)
 
 if __name__ == "__main__":
-    main()
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen on')
+    args = parser.parse_args()
+    port = args.port
+
+    app.run(host='0.0.0.0', port=port)
