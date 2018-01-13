@@ -75,9 +75,16 @@ class CryptoBot(object):
         :param portfolio:
         :return:
         """
+
+        #TODO clean this up
+        total_amount = 0
+        for coin in portfolio:
+            current_coin = self.coincap.get_coin_detail(coin.ticker)
+            total_amount = total_amount + (current_coin['price_{}'.format(self.currency)] * coin.amount)
+
         payload = {
                 'response_type': 'ephemeral',
-                'text': '*Portfolio*',
+                'text': '*Portfolio* - ${:0,.2f}'.format(total_amount),
                 'attachments': self._create_attachments_for_portfolio(portfolio)
             }
         return payload
@@ -89,6 +96,18 @@ class CryptoBot(object):
         :return:
         """
         attachments = []
+        if len(portfolio) == 0:
+            attachment = {
+                'fallback': 'portfolio coin',
+                'color': '#008000',
+                'fields': [
+                    {
+                        'value': 'Your portfolio is empty, fill it with the */portfolio* command!',
+                        'short': 'false'
+                    }
+                ]
+            }
+            return [attachment]
         for coin in portfolio:
             current_coin = self.coincap.get_coin_detail(coin.ticker)
             attachment = {
@@ -134,7 +153,10 @@ class CryptoBot(object):
     def create_help_request(self):
         """
         """
-        payload = {"text": "You can ask me things like \n*@cryptobot coins* - shows list of coin tickers","mrkdw": "true"}
+        payload = {"text": "You can ask me things like \n"
+                           "*@cryptobot coins* - shows list of coin tickers\n"
+                           "*@cryptobot portfolio* - show me my portfolio\n"
+                            "or use my slash commands! */coin* or */portfolio*","mrkdw": "true"}
         return payload
 
     def create_error(self, message):

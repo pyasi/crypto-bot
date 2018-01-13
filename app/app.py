@@ -17,7 +17,6 @@ slack_webhook_url = config['slack']['webhook_url']
 slack_bot = CryptoBot(slack_webhook_url)
 slack = Slack()
 
-
 database = Database('crypto_portfolio')
 
 @app.route('/mentions', methods=['POST'])
@@ -34,12 +33,17 @@ def respond_to_mentions():
 
     command = values['event']['text']
     channel = values['event']['channel']
+    user = values['event']['user']
     response = ''
 
     if 'help' in command:
         response = slack_bot.create_help_request()
     elif 'coins' in command:
         response = slack_bot.get_list_of_coins()
+    elif 'portfolio' in command:
+        data = database.get_user_portfolio(user)
+        portfolio = create_portfolio(data)
+        response = slack_bot.create_portfolio(portfolio)
 
     slack.chat(response, channel)
 
@@ -56,7 +60,7 @@ def add_to_portfolio():
 
     values = text.split(' ')
     coin = slack_bot.coincap.get_coin_detail(values[0].upper())
-    if not coin or not values[1].isdigit() or not values[2].isdigit():
+    if not coin or not is_float(values[1]) or not is_float(values[2]):
         response = slack_bot.create_error('That was not a valid portfolio entry')
         slack.chat(response, channel)
         return '', 200
@@ -65,7 +69,6 @@ def add_to_portfolio():
     database.add_coin(entry)
     data = database.get_user_portfolio(user)
     portfolio = create_portfolio(data)
-
 
     response = slack_bot.create_portfolio(portfolio)
     slack.chat(response, channel)

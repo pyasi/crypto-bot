@@ -2,7 +2,8 @@ from coin import Coin
 
 
 def create_portfolio(data):
-
+    """"
+    """
     portfolio = []
     for coin, ticker, amount, price in data:
         current_coin = Coin(coin, ticker, amount)
@@ -16,3 +17,15 @@ def create_portfolio(data):
             portfolio.append(current_coin)
 
     return portfolio
+
+def is_float(value):
+    """
+
+    :param value:
+    :return:
+    """
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
