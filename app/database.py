@@ -1,0 +1,83 @@
+import psycopg2
+
+
+class Database:
+    def __init__(self, table_name):
+        self.table_name = table_name
+        self.connect()
+
+    def __del__(self):
+        print('Closing connections')
+        self.cursor().close()
+        self.connection.close()
+
+    def connect(self):
+        database_name = "crypto_portfolio"
+        try:
+            self.connection = psycopg2.connect(database=database_name)
+        except psycopg2.OperationalError as oe:
+            pg_connection = psycopg2.connect(database="postgres")
+            pg_connection.set_isolation_level(0)
+            pg_connection.cursor().execute("CREATE DATABASE " + database_name)
+            pg_connection.cursor().close()
+            pg_connection.close()
+            self.connection = psycopg2.connect(database=database_name)
+            self.connection.set_isolation_level(1)
+
+        try:
+            cursor = self.cursor()
+            cursor.execute("select 1 from " + self.table_name)
+            cursor.fetchone()
+            print("connected to " + self.table_name)
+        except psycopg2.DatabaseError as de:
+            print("could not find table " + self.table_name + ", creating now")
+            self.connection.commit()
+            self.create_table()
+
+    def create_table(self):
+        try:
+            print("creating table " + self.table_name)
+            self.cursor().execute("CREATE TABLE " + self.table_name + ""
+                " ( "
+                "    id serial PRIMARY KEY,"
+                "    username varchar, "
+                "    coin varchar, "
+                "    ticker varchar, "
+                "    amount real, "
+                "    price real"
+                ");"
+                )
+            self.connection.commit()
+        except psycopg2.Error as e:
+            print("Could not create table, error: " + e.pgerror)
+            exit(1)
+
+    def cursor(self):
+        return self.connection.cursor()
+
+    def ensure_connected(self):
+        try:
+            self.connection.isolation_level
+        except ConnectionError as oe:
+            self.connect()
+
+    def add_coin(self, values):
+        self.ensure_connected()
+
+        add_row = (
+            "INSERT INTO " + self.table_name + ""
+            "(username, coin, ticker, amount, price)"
+            "VALUES (%(username)s, %(coin)s, %(ticker)s, %(amount)s, %(price)s)"
+        )
+        self.cursor().execute(add_row, values)
+        self.connection.commit()
+
+    def get_user_portfolio(self, user_id):
+        """
+
+        :return:
+        """
+        self.ensure_connected()
+        cursor = self.cursor()
+        cursor.execute("SELECT coin, ticker, amount, price FROM {} where username = '{}';".format(self.table_name, user_id))
+        return cursor.fetchall()

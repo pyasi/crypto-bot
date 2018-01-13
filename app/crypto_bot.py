@@ -69,6 +69,45 @@ class CryptoBot(object):
             }
         return attachment
 
+    def _create_portfolio_for_coins(self, portfolio):
+        """
+
+        :param portfolio:
+        :return:
+        """
+        payload = {
+                'response_type': 'ephemeral',
+                'text': '*Portfolio*',
+                'attachments': self._create_attachments_for_portfolio(portfolio)
+            }
+        return payload
+
+
+    def _create_attachments_for_portfolio(self, portfolio):
+        """
+
+        :return:
+        """
+        attachments = []
+        for coin in portfolio:
+            current_coin = self.coincap.get_coin_detail(coin.ticker)
+            attachment = {
+                'fallback': 'portfolio coin',
+                'color': '#008000',
+                'fields': [
+                    {
+                        'title': '*{}*: - '.format(current_coin['display_name']) + '${0:,.5f}'.format(current_coin['price_{}'.format(
+                            self.currency)]),
+                        'value': '{} {}:   '.format(coin.amount, current_coin['id']) + ' ${:0,.2f}\n'.format(coin.amount * current_coin[
+                            'price_{}'.format(self.currency)]),
+                        'short': 'false'
+                    }
+                ]
+            }
+            attachments.append(attachment)
+        return attachments
+
+
     def get_list_of_coins(self, limit=None):
         """
 
@@ -98,8 +137,22 @@ class CryptoBot(object):
         payload = {"text": "You can ask me things like \n*@cryptobot coins* - shows list of coin tickers","mrkdw": "true"}
         return payload
 
+    def create_error(self, message):
+        """
+        """
+        return self._create_error(message)
+
     def handle_request_for_coin(self, coin_ticker):
         """
 
         """
         return self._single_coin_post(coin_ticker)
+
+    def create_portfolio(self, portfolio):
+        """
+
+        :param portfolio:
+        :return:
+        """
+        return self._create_portfolio_for_coins(portfolio)
+
