@@ -61,15 +61,44 @@ class Database:
         except ConnectionError as oe:
             self.connect()
 
+    def enter_coin(self, values):
+        """
+
+        :param values:
+        :return:
+        """
+        self.ensure_connected()
+        cursor = self.cursor()
+        cursor.execute("SELECT exists(SELECT ticker FROM {} where username = '{}' and ticker = '{}');".format(
+            self.table_name, values['username'], values['ticker']))
+        if cursor.fetchone()[0]:
+            self.update_coin(values)
+        else:
+            self.add_coin(values)
+
     def add_coin(self, values):
         self.ensure_connected()
-
         add_row = (
-            "INSERT INTO " + self.table_name + ""
-            "(username, coin, ticker, amount, price)"
-            "VALUES (%(username)s, %(coin)s, %(ticker)s, %(amount)s, %(price)s)"
+            "INSERT INTO {}(username, coin, ticker, amount, price) VALUES('{}', '{}', '{}', {}, {});".format(
+                self.table_name, values['username'], values['coin'], values['ticker'], values['amount'], values['price'])
         )
         self.cursor().execute(add_row, values)
+        self.connection.commit()
+
+    def update_coin(self, values):
+        """
+
+        :param values:
+        :return:
+        """
+        self.ensure_connected()
+
+        update_row = (
+            "UPDATE {} set amount = {} where ticker = '{}' and username = '{}'".format(
+                self.table_name, values['amount'], values['ticker'], values['username']
+            )
+        )
+        self.cursor().execute(update_row)
         self.connection.commit()
 
     def get_user_portfolio(self, user_id):

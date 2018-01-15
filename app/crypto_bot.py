@@ -5,8 +5,7 @@ AVAILABLE_CURRENCIES = ['usd', 'eur', 'btc', 'ltc', 'zec', 'eth']
 
 class CryptoBot(object):
 
-    def __init__(self, webhook_url, currency='usd'):
-        self.webhook_url = webhook_url
+    def __init__(self, currency='usd'):
         self.coincap = CoinCap()
         if currency.lower() in AVAILABLE_CURRENCIES:
             self.currency = currency.lower()
@@ -31,8 +30,8 @@ class CryptoBot(object):
         coin = self.coincap.get_coin_detail(coin_ticker)
         if coin:
             payload = {
-                'response_type': 'in_channel',
-                'text': '*<http://coincap.io/{}|{}>* - ({})\n\n*Current Price: ${:0.2f}*'.format(
+                'response_type': 'ephemeral',
+                'text': '*<http://coincap.io/{}|{}>* - ({})\n\n*Current Price: ${:0.5f}*'.format(
                     coin['id'], coin['display_name'], coin['id'], coin['price_' + self.currency]),
                 'attachments': [self._create_attachment_with_coin_details(coin)]
             }
@@ -86,9 +85,8 @@ class CryptoBot(object):
                 'response_type': 'ephemeral',
                 'text': '*Portfolio* - ${:0,.2f}'.format(total_amount),
                 'attachments': self._create_attachments_for_portfolio(portfolio)
-            }
+        }
         return payload
-
 
     def _create_attachments_for_portfolio(self, portfolio):
         """
@@ -99,7 +97,7 @@ class CryptoBot(object):
         if len(portfolio) == 0:
             attachment = {
                 'fallback': 'portfolio coin',
-                'color': '#008000',
+                'color': '#D3D3D3',
                 'fields': [
                     {
                         'value': 'Your portfolio is empty, fill it with the */portfolio* command!',
@@ -112,20 +110,23 @@ class CryptoBot(object):
             current_coin = self.coincap.get_coin_detail(coin.ticker)
             attachment = {
                 'fallback': 'portfolio coin',
-                'color': '#008000',
+                'response_type': 'ephemeral',
+                'color': '#D3D3D3',
+                'title': '{}: - '.format(current_coin['display_name']) + '${0:,.5f}'.format(
+                            current_coin['price_{}'.format(self.currency)]),
+                'title_link': 'http://coincap.io/{}'.format(current_coin['id']),
                 'fields': [
                     {
-                        'title': '*{}*: - '.format(current_coin['display_name']) + '${0:,.5f}'.format(current_coin['price_{}'.format(
-                            self.currency)]),
-                        'value': '{} {}:   '.format(coin.amount, current_coin['id']) + ' ${:0,.2f}\n'.format(coin.amount * current_coin[
-                            'price_{}'.format(self.currency)]),
+                        'value': '{:0.5f} {}:   '.format(
+                            int(coin.amount) if coin.amount.is_integer() else coin.amount,
+                            current_coin['id']) + ' ${:0,.2f}\n'.format(coin.amount * current_coin['price_{}'.format(
+                                self.currency)]),
                         'short': 'false'
                     }
                 ]
             }
             attachments.append(attachment)
         return attachments
-
 
     def get_list_of_coins(self, limit=None):
         """
@@ -155,7 +156,7 @@ class CryptoBot(object):
         """
         payload = {"text": "You can ask me things like \n"
                            "*@cryptobot coins* - shows list of coin tickers\n"
-                           "*@cryptobot portfolio* - show me my portfolio\n"
+                           "*@cryptobot portfolio* - show your personal portfolio\n"
                             "or use my slash commands! */coin* or */portfolio*","mrkdw": "true"}
         return payload
 

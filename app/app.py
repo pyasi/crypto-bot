@@ -9,15 +9,10 @@ from utils import *
 # Instantiate our Node
 app = Flask(__name__)
 
-# Configure Slack Bot
-config = ConfigParser()
-config.read('../config.ini')
-slack_webhook_url = config['slack']['webhook_url']
-
-slack_bot = CryptoBot(slack_webhook_url)
+slack_bot = CryptoBot()
 slack = Slack()
-
 database = Database('crypto_portfolio')
+
 
 @app.route('/mentions', methods=['POST'])
 def respond_to_mentions():
@@ -49,6 +44,7 @@ def respond_to_mentions():
 
     return '', 200
 
+
 @app.route('/portfolio', methods=['POST', 'GET'])
 def add_to_portfolio():
     """
@@ -66,7 +62,7 @@ def add_to_portfolio():
         return '', 200
 
     entry = dict(username=user, coin=coin['display_name'], ticker=coin['id'], amount=values[1], price=values[2])
-    database.add_coin(entry)
+    database.enter_coin(entry)
     data = database.get_user_portfolio(user)
     portfolio = create_portfolio(data)
 
@@ -80,7 +76,6 @@ def send_coin_information():
     """
 
     """
-    command = request.form.get('command', None)
     text = request.form.get('text', None)
     channel = request.form.get('channel_id', None)
 
