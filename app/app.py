@@ -1,10 +1,9 @@
-from configparser import ConfigParser
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 from crypto_bot import CryptoBot
 from slack import Slack
 from database import Database
 from utils import *
-
+import json
 
 # Instantiate our Node
 app = Flask(__name__)
@@ -33,17 +32,33 @@ def respond_to_mentions():
 
     if 'help' in command:
         response = slack_bot.create_help_request()
+        slack.chat(response, channel)
     elif 'coins' in command:
         response = slack_bot.get_list_of_coins()
+        slack.chat(response, channel)
     elif 'portfolio' in command:
         data = database.get_user_portfolio(user)
         portfolio = create_portfolio(data)
         response = slack_bot.create_portfolio(portfolio)
+        slack.post_ephemeral(response, channel, user)
 
-    slack.chat(response, channel)
 
     return '', 200
 
+
+@app.route('/post/actions', methods=['POST'])
+def respond_to_actions():
+    """
+    """
+    values = json.loads(request.values['payload'])
+    #original_message = values['original_message']
+    channel = values['channel']['id']
+    time_stamp = values['message_ts']
+
+    if values['actions'][0]['value'] == 'publish':
+        #original_message['response_type'] == 'in_channel'
+        slack.update_message(time_stamp, channel)
+    return '', 200
 
 @app.route('/portfolio', methods=['POST', 'GET'])
 def add_to_portfolio():
@@ -67,8 +82,8 @@ def add_to_portfolio():
     portfolio = create_portfolio(data)
 
     response = slack_bot.create_portfolio(portfolio)
-    slack.chat(response, channel)
-    return '', 200
+    #slack.chat(response, channel)
+    return jsonify(response), 200
 
 
 @app.route('/coin', methods=['POST', 'GET'])
@@ -76,12 +91,16 @@ def send_coin_information():
     """
 
     """
-    text = request.form.get('text', None)
+    text = request.form.get('text', None).split(' ')
     channel = request.form.get('channel_id', None)
 
-    response = slack_bot.handle_request_for_coin(text.upper())
-    slack.chat(response, channel)
-    return '', 200
+    response = slack_bot.handle_request_for_coin(text[0].upper())
+
+    if len(text) > 1 and text[1] == 'public':
+        slack.chat(response, channel)
+        return '', 200
+
+    return jsonify(response), 200
 
 if __name__ == "__main__":
     from argparse import ArgumentParser

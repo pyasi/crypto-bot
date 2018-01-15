@@ -30,14 +30,13 @@ class CryptoBot(object):
         coin = self.coincap.get_coin_detail(coin_ticker)
         if coin:
             payload = {
-                'response_type': 'ephemeral',
                 'text': '*<http://coincap.io/{}|{}>* - ({})\n\n*Current Price: ${:0.5f}*'.format(
                     coin['id'], coin['display_name'], coin['id'], coin['price_' + self.currency]),
                 'attachments': [self._create_attachment_with_coin_details(coin)]
             }
             return payload
         else:
-            return self._create_error('That does not seem to be a valid ticker')
+            return self._create_error('That does not seem to be a valid ticker, try */coin* BTC')
 
     def _create_attachment_with_coin_details(self, coin):
         """
@@ -64,8 +63,28 @@ class CryptoBot(object):
                     'value': '*Available Supply:* {:,}\n'.format(coin['supply']),
                     'short': 'false'
                 }
-                    ]
-            }
+            ]
+        }
+        return attachment
+
+    # TODO unused
+    def _create_publish_to_channel_action(self):
+        """
+
+        :return:
+        """
+        attachment = {
+            'color': '#D3D3D3',
+            'callback_id': 'publish_to_channel',
+            "actions": [
+                {
+                    "name": "Publish",
+                    "text": "Publish to Channel  :eyes:",
+                    "type": "button",
+                    "value": "publish"
+                }
+            ]
+        }
         return attachment
 
     def _create_portfolio_for_coins(self, portfolio):
@@ -82,7 +101,6 @@ class CryptoBot(object):
             total_amount = total_amount + (current_coin['price_{}'.format(self.currency)] * coin.amount)
 
         payload = {
-                'response_type': 'ephemeral',
                 'text': '*Portfolio* - ${:0,.2f}'.format(total_amount),
                 'attachments': self._create_attachments_for_portfolio(portfolio)
         }
@@ -110,7 +128,6 @@ class CryptoBot(object):
             current_coin = self.coincap.get_coin_detail(coin.ticker)
             attachment = {
                 'fallback': 'portfolio coin',
-                'response_type': 'ephemeral',
                 'color': '#D3D3D3',
                 'title': '{}: - '.format(current_coin['display_name']) + '${0:,.5f}'.format(
                             current_coin['price_{}'.format(self.currency)]),
@@ -141,7 +158,6 @@ class CryptoBot(object):
             response_string = response_string + '{} - `{}` *|* '.format(coin['long'], coin['short'])
 
         payload = {
-            "response_type": "ephemeral",
             'attachments': [{
                 "fallback": "List of coins",
                 "color": "#008000",
