@@ -42,8 +42,7 @@ class Database:
                                   "    username varchar, "
                                   "    coin varchar, "
                                   "    ticker varchar, "
-                                  "    amount real, "
-                                  "    price real"
+                                  "    amount real"
                                   ");")
             self.connection.commit()
         except psycopg2.Error as e:
@@ -84,9 +83,9 @@ class Database:
         """
         self.ensure_connected()
         add_row = (
-            "INSERT INTO {}(username, coin, ticker, amount, price) VALUES('{}', '{}', '{}', {}, {});".
+            "INSERT INTO {}(username, coin, ticker, amount) VALUES('{}', '{}', '{}', {});".
             format(self.table_name, values['username'], values['coin'],
-                   values['ticker'], values['amount'], values['price']))
+                   values['ticker'], values['amount']))
         self.cursor().execute(add_row, values)
         self.connection.commit()
 
@@ -114,6 +113,6 @@ class Database:
         self.ensure_connected()
         cursor = self.cursor()
         cursor.execute(
-            "SELECT coin, ticker, amount, price FROM {} where username = '{}';".
+            "SELECT coin, ticker, amount FROM {} where username = '{}';".
             format(self.table_name, user_id))
         return cursor.fetchall()
