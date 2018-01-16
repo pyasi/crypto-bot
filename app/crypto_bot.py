@@ -4,6 +4,7 @@ AVAILABLE_CURRENCIES = ['usd', 'eur', 'btc', 'ltc', 'zec', 'eth']
 
 
 class CryptoBot(object):
+
     def __init__(self, currency='usd'):
         self.coincap = CoinCap()
         if currency.lower() in AVAILABLE_CURRENCIES:
@@ -14,14 +15,15 @@ class CryptoBot(object):
 
     def _create_error(self, message):
         """
-
+        Create the JSON object for an error response to the user
         """
         payload = {'response_type': "ephemeral", 'text': message}
         return payload
 
     def _single_coin_post(self, coin_ticker):
         """
-
+        Create a JSON object with an attachment giving the details of a
+        single coin
         """
         coin = self.coincap.get_coin_detail(coin_ticker)
         if coin:
@@ -40,7 +42,7 @@ class CryptoBot(object):
 
     def _create_attachment_with_coin_details(self, coin):
         """
-
+        Creates the attachment for a single coin query
         """
         attachment = {
             'fallback':
@@ -76,8 +78,7 @@ class CryptoBot(object):
     # TODO Currently Unused
     def _create_publish_to_channel_action(self):
         """
-
-        :return:
+        Create an action (button) to publish a particular message to the channel
         """
         attachment = {
             'color':
@@ -95,9 +96,10 @@ class CryptoBot(object):
 
     def _create_portfolio_for_coins(self, portfolio):
         """
+        Create a potfolio JSON object to display users portfolio
 
-        :param portfolio:
-        :return:
+        :param portfolio: A list of Coins and the amount the user holds
+        :return: JSON object
         """
         total_amount = 0
         for coin in portfolio:
@@ -113,8 +115,7 @@ class CryptoBot(object):
 
     def _create_attachments_for_portfolio(self, portfolio):
         """
-
-        :return:
+        Create an attachment for the portfolio.
         """
         attachments = []
         if len(portfolio) == 0:
@@ -161,8 +162,7 @@ class CryptoBot(object):
 
     def get_list_of_coins(self, limit=None):
         """
-
-        :return:
+        Create a JSON object containing a list of coins and their corresponding tickers
         """
         coins = []
         top_coins = self.coincap.get_front()[:limit]
@@ -184,13 +184,16 @@ class CryptoBot(object):
 
     def create_help_request(self):
         """
+        Create a JSON object to respond to a help request, explain functionality.
         """
         payload = {
             "text":
             "You can ask me things like \n"
             "*@cryptobot coins* - shows list of coin tickers\n"
             "*@cryptobot portfolio* - show your personal portfolio\n"
-            "or use my slash commands! */coin* or */portfolio*",
+            "or use my slash commands: \n"
+            "*/coin* to show stats on any coin\n"
+            "*/portfolio* to add to your personal portfolio for real time tracking!",
             "mrkdw":
             "true"
         }
@@ -198,19 +201,24 @@ class CryptoBot(object):
 
     def create_error(self, message):
         """
+        Creates an error with text of your choosing
+
+        :param message: text to send to user
+        :return: JSON object
         """
         return self._create_error(message)
 
     def handle_request_for_coin(self, coin_ticker):
         """
-
+        Creates post for single coin statistics
         """
         return self._single_coin_post(coin_ticker)
 
     def create_portfolio(self, portfolio):
         """
+        Creates a post for the user's portfolio
 
-        :param portfolio:
-        :return:
+        :param portfolio: list of Coins
+        :return: JSON object
         """
         return self._create_portfolio_for_coins(portfolio)

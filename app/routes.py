@@ -6,6 +6,7 @@ import json
 
 @app.route('/mentions', methods=['POST'])
 def respond_to_mentions():
+
     values = request.get_json()
     try:
         message_type = values['event']['subtype']
@@ -13,8 +14,6 @@ def respond_to_mentions():
             return '', 204
     except KeyError:
         pass
-
-    print(values)
 
     command = values['event']['text']
     channel = values['event']['channel']
@@ -37,8 +36,7 @@ def respond_to_mentions():
 # TODO no current action to respond to in app
 @app.route('/post/actions', methods=['POST'])
 def respond_to_actions():
-    """
-    """
+
     values = json.loads(request.values['payload'])
     #original_message = values['original_message']
     channel = values['channel']['id']
@@ -53,9 +51,7 @@ def respond_to_actions():
 
 @app.route('/portfolio', methods=['POST', 'GET'])
 def add_to_portfolio():
-    """
 
-    """
     user = request.form.get('user_id')
     text = request.form.get('text', None)
     channel = request.form.get('channel_id', None)
@@ -84,9 +80,7 @@ def add_to_portfolio():
 
 @app.route('/coin', methods=['POST', 'GET'])
 def send_coin_information():
-    """
 
-    """
     text = request.form.get('text', None).split(' ')
     channel = request.form.get('channel_id', None)
 

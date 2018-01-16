@@ -8,9 +8,12 @@ class Slack(object):
 
     def post_to_slack(self, url, message, channel):
         """
+        Generic method to post any given content to slack
 
-        :param url:
-        :return:
+        :param url: slack URL to hit
+        :param message: message contents as a JSON object
+        :param channel: channel id to post to
+        :return: timestamp of sent message
         """
         headers = {
             "Content-Type": "application/json",
@@ -31,20 +34,22 @@ class Slack(object):
 
     def post_message(self, message: dict, channel):
         """
+        Create a public post using Slack's API
 
-        :param message:
-        :param channel:
-        :return:
+        :param message: message contents as a JSON object
+        :param channel: channel id to post to
+        :return: timestamp of message
         """
         url = 'https://slack.com/api/chat.postMessage'
         return self.post_to_slack(url, message, channel)
 
     def post_ephemeral(self, message: dict, channel, user):
         """
+        Create a private (ephemeral) message using Slack's API
 
-        :param message:
-        :param channel:
-        :return:
+        :param message: message contents as a JSON object
+        :param channel: channel id to post to
+        :return: timestamp of message
         """
         url = 'https://slack.com/api/chat.postEphemeral'
         message['user'] = user
@@ -52,10 +57,11 @@ class Slack(object):
 
     def update_message(self, message, time_stamp, channel):
         """
+        Update an existing message using Slack's API
 
-        :param message:
-        :param time_stamp:
-        :return:
+        :param message: message contents as a JSON object
+        :param time_stamp: timestamp of message to update
+        :return: timestamp of message
         """
         url = 'https://slack.com/api/chat.update'
         message['ts'] = time_stamp

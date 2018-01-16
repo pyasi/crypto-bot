@@ -7,7 +7,6 @@ class Database:
         self.connect()
 
     def __del__(self):
-        print('Closing connections')
         self.cursor().close()
         self.connection.close()
 
@@ -15,7 +14,7 @@ class Database:
         database_name = "crypto_portfolio"
         try:
             self.connection = psycopg2.connect(database=database_name)
-        except psycopg2.OperationalError as oe:
+        except psycopg2.OperationalError:
             pg_connection = psycopg2.connect(database="postgres")
             pg_connection.set_isolation_level(0)
             pg_connection.cursor().execute("CREATE DATABASE " + database_name)
@@ -62,9 +61,10 @@ class Database:
 
     def enter_coin(self, values):
         """
+        Called when a user uses the /portfolio slash command. Decides whether
+        to update an existing row or create a new one
 
-        :param values:
-        :return:
+        :param values: Values to enter into DB
         """
         self.ensure_connected()
         cursor = self.cursor()
@@ -77,6 +77,11 @@ class Database:
             self.add_coin(values)
 
     def add_coin(self, values):
+        """
+        Creates a row in the DB with the given values
+
+        :param values: Values with coin details
+        """
         self.ensure_connected()
         add_row = (
             "INSERT INTO {}(username, coin, ticker, amount, price) VALUES('{}', '{}', '{}', {}, {});".
@@ -87,9 +92,9 @@ class Database:
 
     def update_coin(self, values):
         """
+        Updates an existing row in the DB with the given values
 
-        :param values:
-        :return:
+        :param values: Values with coin details
         """
         self.ensure_connected()
 
@@ -102,8 +107,9 @@ class Database:
 
     def get_user_portfolio(self, user_id):
         """
+        Gets the user's portfolio from the DB
 
-        :return:
+        :return: All user's rows
         """
         self.ensure_connected()
         cursor = self.cursor()
