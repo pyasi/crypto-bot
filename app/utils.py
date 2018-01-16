@@ -10,7 +10,7 @@ def create_portfolio(data):
     :return: list of Coins and the amount the user has
     """
     portfolio = []
-    for coin, ticker, amount, price in data:
+    for coin, ticker, amount in data:
         current_coin = Coin(coin, ticker, amount)
         is_new = True
         for old_coin in portfolio:

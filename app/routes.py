@@ -33,7 +33,7 @@ def respond_to_mentions():
 
     return '', 204
 
-# TODO no current action to respond to in app
+# TODO no current action to respond to in app, ephemeral messages don't have 'original_message' :sad:
 @app.route('/post/actions', methods=['POST'])
 def respond_to_actions():
 
@@ -58,18 +58,17 @@ def add_to_portfolio():
 
     values = text.split(' ')
     coin = slack_bot.coincap.get_coin_detail(values[0].upper())
-    if not coin or not is_float(values[1]) or not is_float(values[2]):
+    if not coin or not is_float(values[1]):
         response = slack_bot.create_error(
             'That was not a valid portfolio entry')
-        slack.post_message(response, channel)
+        slack.post_ephemeral(response, channel, user)
         return '', 200
 
     entry = dict(
         username=user,
         coin=coin['display_name'],
         ticker=coin['id'],
-        amount=values[1],
-        price=values[2])
+        amount=values[1])
     database.enter_coin(entry)
     data = database.get_user_portfolio(user)
     portfolio = create_portfolio(data)
