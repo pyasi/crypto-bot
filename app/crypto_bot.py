@@ -4,7 +4,6 @@ AVAILABLE_CURRENCIES = ['usd', 'eur', 'btc', 'ltc', 'zec', 'eth']
 
 
 class CryptoBot(object):
-
     def __init__(self, currency='usd'):
         self.coincap = CoinCap()
         if currency.lower() in AVAILABLE_CURRENCIES:
@@ -17,10 +16,7 @@ class CryptoBot(object):
         """
 
         """
-        payload = {
-            'response_type': "ephemeral",
-            'text': message
-        }
+        payload = {'response_type': "ephemeral", 'text': message}
         return payload
 
     def _single_coin_post(self, coin_ticker):
@@ -30,60 +26,70 @@ class CryptoBot(object):
         coin = self.coincap.get_coin_detail(coin_ticker)
         if coin:
             payload = {
-                'text': '*<http://coincap.io/{}|{}>* - ({})\n\n*Current Price: ${:0.5f}*'.format(
-                    coin['id'], coin['display_name'], coin['id'], coin['price_' + self.currency]),
-                'attachments': [self._create_attachment_with_coin_details(coin)]
+                'text':
+                '*<http://coincap.io/{}|{}>* - ({})\n\n*Current Price: ${:0.5f}*'.
+                format(coin['id'], coin['display_name'], coin['id'],
+                       coin['price_' + self.currency]),
+                'attachments':
+                [self._create_attachment_with_coin_details(coin)]
             }
             return payload
         else:
-            return self._create_error('That does not seem to be a valid ticker, try */coin* BTC')
+            return self._create_error(
+                'That does not seem to be a valid ticker, try */coin* BTC')
 
     def _create_attachment_with_coin_details(self, coin):
         """
 
         """
         attachment = {
-            'fallback': '{}, current price: {}, 24 hour change: {}'.format(
-                coin['display_name'], coin['price_' + self.currency], coin['cap24hrChange']),
-            'color': '#008000' if coin['cap24hrChange'] > 0 else '#FF0000',
-            'fields': [
-                {
-                    'value': '*24 Hour Change:* {:>}%\n'.format(str(coin['cap24hrChange'])),
-                    'short': 'false'
-                },
-                {
-                    'value': '*Market Cap:* ${:,}\n'.format(coin['market_cap']),
-                    'short': 'false'
-                },
-                {
-                    'value': '*24 Hour Volume:* ${:,}\n'.format(coin['volume']),
-                    'short': 'false'
-                },
-                {
-                    'value': '*Available Supply:* {:,}\n'.format(coin['supply']),
-                    'short': 'false'
-                }
-            ]
+            'fallback':
+            '{}, current price: {}, 24 hour change: {}'.format(
+                coin['display_name'], coin['price_' + self.currency],
+                coin['cap24hrChange']),
+            'color':
+            '#008000' if coin['cap24hrChange'] > 0 else '#FF0000',
+            'fields': [{
+                'value':
+                '*24 Hour Change:* {:>}%\n'.format(str(coin['cap24hrChange'])),
+                'short':
+                'false'
+            }, {
+                'value':
+                '*Market Cap:* ${:,}\n'.format(coin['market_cap']),
+                'short':
+                'false'
+            }, {
+                'value':
+                '*24 Hour Volume:* ${:,}\n'.format(coin['volume']),
+                'short':
+                'false'
+            }, {
+                'value':
+                '*Available Supply:* {:,}\n'.format(coin['supply']),
+                'short':
+                'false'
+            }]
         }
         return attachment
 
-    # TODO unused
+    # TODO Currently Unused
     def _create_publish_to_channel_action(self):
         """
 
         :return:
         """
         attachment = {
-            'color': '#D3D3D3',
-            'callback_id': 'publish_to_channel',
-            "actions": [
-                {
-                    "name": "Publish",
-                    "text": "Publish to Channel  :eyes:",
-                    "type": "button",
-                    "value": "publish"
-                }
-            ]
+            'color':
+            '#D3D3D3',
+            'callback_id':
+            'publish_to_channel',
+            "actions": [{
+                "name": "Publish",
+                "text": "Publish to Channel  :eyes:",
+                "type": "button",
+                "value": "publish"
+            }]
         }
         return attachment
 
@@ -93,16 +99,15 @@ class CryptoBot(object):
         :param portfolio:
         :return:
         """
-
-        #TODO clean this up
         total_amount = 0
         for coin in portfolio:
             current_coin = self.coincap.get_coin_detail(coin.ticker)
-            total_amount = total_amount + (current_coin['price_{}'.format(self.currency)] * coin.amount)
+            total_amount = total_amount + (
+                current_coin['price_{}'.format(self.currency)] * coin.amount)
 
         payload = {
-                'text': '*Portfolio* - ${:0,.2f}'.format(total_amount),
-                'attachments': self._create_attachments_for_portfolio(portfolio)
+            'text': '*Portfolio* - ${:0,.2f}'.format(total_amount),
+            'attachments': self._create_attachments_for_portfolio(portfolio)
         }
         return payload
 
@@ -114,33 +119,42 @@ class CryptoBot(object):
         attachments = []
         if len(portfolio) == 0:
             attachment = {
-                'fallback': 'portfolio coin',
-                'color': '#D3D3D3',
-                'fields': [
-                    {
-                        'value': 'Your portfolio is empty, fill it with the */portfolio* command!',
-                        'short': 'false'
-                    }
-                ]
+                'fallback':
+                'portfolio coin',
+                'color':
+                '#D3D3D3',
+                'fields': [{
+                    'value':
+                    'Your portfolio is empty, fill it with the */portfolio* command!',
+                    'short':
+                    'false'
+                }]
             }
             return [attachment]
         for coin in portfolio:
             current_coin = self.coincap.get_coin_detail(coin.ticker)
             attachment = {
-                'fallback': 'portfolio coin',
-                'color': '#D3D3D3',
-                'title': '{}: - '.format(current_coin['display_name']) + '${0:,.5f}'.format(
-                            current_coin['price_{}'.format(self.currency)]),
-                'title_link': 'http://coincap.io/{}'.format(current_coin['id']),
-                'fields': [
-                    {
-                        'value': '{:0.5f} {}:   '.format(
-                            int(coin.amount) if coin.amount.is_integer() else coin.amount,
-                            current_coin['id']) + ' ${:0,.2f}\n'.format(coin.amount * current_coin['price_{}'.format(
+                'fallback':
+                'portfolio coin',
+                'color':
+                '#D3D3D3',
+                'title':
+                '{}: - '.format(current_coin['display_name']) +
+                '${0:,.5f}'.format(current_coin['price_{}'.format(
+                    self.currency)]),
+                'title_link':
+                'http://coincap.io/{}'.format(current_coin['id']),
+                'fields': [{
+                    'value':
+                    '{:0.5f} {}:   '.format(
+                        int(coin.amount)
+                        if coin.amount.is_integer() else coin.amount,
+                        current_coin['id']) + ' ${:0,.2f}\n'.format(
+                            coin.amount * current_coin['price_{}'.format(
                                 self.currency)]),
-                        'short': 'false'
-                    }
-                ]
+                    'short':
+                    'false'
+                }]
             }
             attachments.append(attachment)
         return attachments
@@ -155,7 +169,8 @@ class CryptoBot(object):
         response_string = "\n"
         for coin in top_coins:
             coins.append([coin['long'], coin['short']])
-            response_string = response_string + '{} - `{}` *|* '.format(coin['long'], coin['short'])
+            response_string = response_string + '{} - `{}` *|* '.format(
+                coin['long'], coin['short'])
 
         payload = {
             'attachments': [{
@@ -170,10 +185,15 @@ class CryptoBot(object):
     def create_help_request(self):
         """
         """
-        payload = {"text": "You can ask me things like \n"
-                           "*@cryptobot coins* - shows list of coin tickers\n"
-                           "*@cryptobot portfolio* - show your personal portfolio\n"
-                            "or use my slash commands! */coin* or */portfolio*","mrkdw": "true"}
+        payload = {
+            "text":
+            "You can ask me things like \n"
+            "*@cryptobot coins* - shows list of coin tickers\n"
+            "*@cryptobot portfolio* - show your personal portfolio\n"
+            "or use my slash commands! */coin* or */portfolio*",
+            "mrkdw":
+            "true"
+        }
         return payload
 
     def create_error(self, message):
@@ -194,4 +214,3 @@ class CryptoBot(object):
         :return:
         """
         return self._create_portfolio_for_coins(portfolio)
-

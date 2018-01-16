@@ -3,7 +3,6 @@ import json
 
 
 class Slack(object):
-
     def __init__(self):
         self.api_token = json.load(open('../local.json'))['slack_api_token']
 
@@ -13,19 +12,30 @@ class Slack(object):
         :param url:
         :return:
         """
-        headers = {"Content-Type": "application/json", "Authorization": "Bearer {}".format(self.api_token)}
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(self.api_token)
+        }
         message['channel'] = channel
-        response = requests.post(url, data=json.dumps(message), headers=headers)
+        response = requests.post(
+            url, data=json.dumps(message), headers=headers)
         response_object = json.loads(response.text)
-        if response_object['ok'] == False:
-            raise Exception('Failed to send slack- message {}'.format(response_object['error']))
+        if response_object['ok'] is False:
+            raise Exception('Failed to send slack- message {}'.format(
+                response_object['error']))
         try:
             time_stamp = response_object['ts']
             return time_stamp
         except KeyError:
             return
 
-    def chat(self, message: dict, channel):
+    def post_message(self, message: dict, channel):
+        """
+
+        :param message:
+        :param channel:
+        :return:
+        """
         url = 'https://slack.com/api/chat.postMessage'
         return self.post_to_slack(url, message, channel)
 

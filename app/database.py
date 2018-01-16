@@ -38,15 +38,14 @@ class Database:
         try:
             print("creating table " + self.table_name)
             self.cursor().execute("CREATE TABLE " + self.table_name + ""
-                " ( "
-                "    id serial PRIMARY KEY,"
-                "    username varchar, "
-                "    coin varchar, "
-                "    ticker varchar, "
-                "    amount real, "
-                "    price real"
-                ");"
-                )
+                                  " ( "
+                                  "    id serial PRIMARY KEY,"
+                                  "    username varchar, "
+                                  "    coin varchar, "
+                                  "    ticker varchar, "
+                                  "    amount real, "
+                                  "    price real"
+                                  ");")
             self.connection.commit()
         except psycopg2.Error as e:
             print("Could not create table, error: " + e.pgerror)
@@ -69,8 +68,9 @@ class Database:
         """
         self.ensure_connected()
         cursor = self.cursor()
-        cursor.execute("SELECT exists(SELECT ticker FROM {} where username = '{}' and ticker = '{}');".format(
-            self.table_name, values['username'], values['ticker']))
+        cursor.execute(
+            "SELECT exists(SELECT ticker FROM {} where username = '{}' and ticker = '{}');".
+            format(self.table_name, values['username'], values['ticker']))
         if cursor.fetchone()[0]:
             self.update_coin(values)
         else:
@@ -79,9 +79,9 @@ class Database:
     def add_coin(self, values):
         self.ensure_connected()
         add_row = (
-            "INSERT INTO {}(username, coin, ticker, amount, price) VALUES('{}', '{}', '{}', {}, {});".format(
-                self.table_name, values['username'], values['coin'], values['ticker'], values['amount'], values['price'])
-        )
+            "INSERT INTO {}(username, coin, ticker, amount, price) VALUES('{}', '{}', '{}', {}, {});".
+            format(self.table_name, values['username'], values['coin'],
+                   values['ticker'], values['amount'], values['price']))
         self.cursor().execute(add_row, values)
         self.connection.commit()
 
@@ -94,10 +94,9 @@ class Database:
         self.ensure_connected()
 
         update_row = (
-            "UPDATE {} set amount = {} where ticker = '{}' and username = '{}'".format(
-                self.table_name, values['amount'], values['ticker'], values['username']
-            )
-        )
+            "UPDATE {} set amount = {} where ticker = '{}' and username = '{}'".
+            format(self.table_name, values['amount'], values['ticker'],
+                   values['username']))
         self.cursor().execute(update_row)
         self.connection.commit()
 
@@ -108,5 +107,7 @@ class Database:
         """
         self.ensure_connected()
         cursor = self.cursor()
-        cursor.execute("SELECT coin, ticker, amount, price FROM {} where username = '{}';".format(self.table_name, user_id))
+        cursor.execute(
+            "SELECT coin, ticker, amount, price FROM {} where username = '{}';".
+            format(self.table_name, user_id))
         return cursor.fetchall()

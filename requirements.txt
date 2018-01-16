@@ -1,0 +1,4 @@
+python-coincap
+psycopg2
+flask
+requests
