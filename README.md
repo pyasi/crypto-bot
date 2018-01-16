@@ -29,25 +29,35 @@ This slackbot gives you the ability to view current data on all coins, as well a
 #### Portfolio
  ```
 /Portfolio [ticker] [amount]
- ``` To add/alter portfolio
- or
+ ``` 
+ 
+ To add/alter portfolio and then view it
+ 
+ Or
+ 
  ```
 @cryptobot portfolio
- ``` To view it
+ ``` 
+ 
+ To just view it
  
 ![Alt text](screenshots/Portfolio.png "Portfolio")
 
 #### All coins
  ```
 @cryptobot coins
- ``` or DM bot directly
+ ``` 
+ 
+ or DM bot directly
  
 ![Alt text](screenshots/List-all-coins.png "All Coins")
 
 #### Help
  ```
 @cryptobot help
- ``` or DM bot directly
+ ``` 
+ 
+ or DM bot directly
  
 ![Alt text](screenshots/Help-menu.png "Help Menu")
 
