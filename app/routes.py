@@ -15,7 +15,7 @@ def respond_to_mentions():
     except KeyError:
         pass
 
-    command = values['event']['text']
+    command = values['event']['text'].lower()
     channel = values['event']['channel']
     user = values['event']['user']
 
