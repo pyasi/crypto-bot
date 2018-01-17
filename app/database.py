@@ -104,6 +104,20 @@ class Database:
         self.cursor().execute(update_row)
         self.connection.commit()
 
+    def delete_coin(self, values):
+        """
+        Deletes a coin from the DB for a user
+
+        :param values: Values with coin details
+        """
+        self.ensure_connected()
+
+        delete_row = (
+            "DELETE from {} WHERE ticker = '{}' and username = '{}'".
+            format(self.table_name, values['ticker'], values['username']))
+        self.cursor().execute(delete_row)
+        self.connection.commit()
+
     def get_user_portfolio(self, user_id):
         """
         Gets the user's portfolio from the DB

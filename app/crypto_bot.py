@@ -31,7 +31,7 @@ class CryptoBot(object):
                 'text':
                 '*<http://coincap.io/{}|{}>* - ({})\n\n*Current Price: ${:0.5f}*'.
                 format(coin['id'], coin['display_name'], coin['id'],
-                       coin['price_' + self.currency]),
+                       coin['price']),
                 'attachments':
                 [self._create_attachment_with_coin_details(coin)]
             }
@@ -47,7 +47,7 @@ class CryptoBot(object):
         attachment = {
             'fallback':
             '{}, current price: {}, 24 hour change: {}'.format(
-                coin['display_name'], coin['price_' + self.currency],
+                coin['display_name'], coin['price'],
                 coin['cap24hrChange']),
             'color':
             '#008000' if coin['cap24hrChange'] > 0 else '#FF0000',
@@ -105,7 +105,7 @@ class CryptoBot(object):
         for coin in portfolio:
             current_coin = self.coincap.get_coin_detail(coin.ticker)
             total_amount = total_amount + (
-                current_coin['price_{}'.format(self.currency)] * coin.amount)
+                current_coin['price'] * coin.amount)
 
         payload = {
             'text': '*Portfolio* - ${:0,.2f}'.format(total_amount),
@@ -141,8 +141,7 @@ class CryptoBot(object):
                 '#D3D3D3',
                 'title':
                 '{}: - '.format(current_coin['display_name']) +
-                '${0:,.5f}'.format(current_coin['price_{}'.format(
-                    self.currency)]),
+                '${0:,.5f}'.format(current_coin['price']),
                 'title_link':
                 'http://coincap.io/{}'.format(current_coin['id']),
                 'fields': [{
@@ -151,8 +150,7 @@ class CryptoBot(object):
                         int(coin.amount)
                         if coin.amount.is_integer() else coin.amount,
                         current_coin['id']) + ' ${:0,.2f}\n'.format(
-                            coin.amount * current_coin['price_{}'.format(
-                                self.currency)]),
+                            coin.amount * current_coin['price']),
                     'short':
                     'false'
                 }]

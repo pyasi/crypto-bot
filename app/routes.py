@@ -69,7 +69,11 @@ def add_to_portfolio():
         coin=coin['display_name'],
         ticker=coin['id'],
         amount=values[1])
-    database.enter_coin(entry)
+    print(entry['amount'])
+    if entry['amount'] is '0':
+        database.delete_coin(entry)
+    else:
+        database.enter_coin(entry)
     data = database.get_user_portfolio(user)
     portfolio = create_portfolio(data)
 
