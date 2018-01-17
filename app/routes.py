@@ -1,7 +1,21 @@
 from app.utils import *
-from app import app, slack_bot, slack, database
 from flask import request, jsonify
 import json
+from flask import Flask
+from app.crypto_bot import CryptoBot
+from app.slack import Slack
+from app.database import Database
+
+app = Flask(__name__)
+
+slack_bot = CryptoBot()
+slack = Slack()
+database = Database('crypto_portfolio')
+
+
+@app.route('/', methods=['GET'])
+def hello():
+    return 'hello', 200
 
 
 @app.route('/mentions', methods=['POST'])
@@ -20,16 +34,16 @@ def respond_to_mentions():
     user = values['event']['user']
 
     if 'help' in command:
-        response = slack_bot.create_help_request()
-        slack.post_message(response, channel)
+        message_to_slack = slack_bot.create_help_request()
+        return slack.post_message(message_to_slack, channel), 200
     elif 'coins' in command:
-        response = slack_bot.get_list_of_coins()
-        slack.post_message(response, channel)
+        message_to_slack = slack_bot.get_list_of_coins()
+        return slack.post_message(message_to_slack, channel), 200
     elif 'portfolio' in command:
         data = database.get_user_portfolio(user)
         portfolio = create_portfolio(data)
-        response = slack_bot.create_portfolio(portfolio)
-        slack.post_ephemeral(response, channel, user)
+        message_to_slack = slack_bot.create_portfolio(portfolio)
+        return slack.post_ephemeral(message_to_slack, channel, user), 200
 
     return '', 204
 
@@ -51,6 +65,7 @@ def respond_to_actions():
 
 @app.route('/portfolio', methods=['POST', 'GET'])
 def add_to_portfolio():
+    values = request.form
 
     user = request.form.get('user_id')
     text = request.form.get('text', None)
@@ -62,7 +77,7 @@ def add_to_portfolio():
         response = slack_bot.create_error(
             'That was not a valid portfolio entry')
         slack.post_ephemeral(response, channel, user)
-        return '', 200
+        return '', 204
 
     entry = dict(
         username=user,
@@ -94,3 +109,14 @@ def send_coin_information():
         return '', 204
 
     return jsonify(response), 200
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument(
+        '-p', '--port', default=5000, type=int, help='port to listen on')
+    args = parser.parse_args()
+    port = args.port
+
+    app.run(host='0.0.0.0', port=port)

@@ -4,7 +4,7 @@ import json
 
 class Slack(object):
     def __init__(self):
-        self.api_token = json.load(open('../local.json'))['slack_api_token']
+        self.api_token = "xoxb-296558267924-vGYJ8FyQ75ytrMk2fQNNCTUp"#json.load(open('../local.json'))['slack_api_token']
 
     def post_to_slack(self, url, message, channel):
         """
@@ -24,8 +24,7 @@ class Slack(object):
             url, data=json.dumps(message), headers=headers)
         response_object = json.loads(response.text)
         if response_object['ok'] is False:
-            raise Exception('Failed to send slack- message {}'.format(
-                response_object['error']))
+            return 'Failed to send slack- message {}'.format(response_object['error'])
         try:
             time_stamp = response_object['ts']
             return time_stamp
