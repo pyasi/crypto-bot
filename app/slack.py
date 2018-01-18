@@ -24,8 +24,7 @@ class Slack(object):
             url, data=json.dumps(message), headers=headers)
         response_object = json.loads(response.text)
         if response_object['ok'] is False:
-            raise Exception('Failed to send slack- message {}'.format(
-                response_object['error']))
+            return 'Failed to send slack- message {}'.format(response_object['error'])
         try:
             time_stamp = response_object['ts']
             return time_stamp

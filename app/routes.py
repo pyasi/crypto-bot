@@ -1,7 +1,12 @@
 from app.utils import *
-from app import app, slack_bot, slack, database
 from flask import request, jsonify
 import json
+from app import app, slack_bot, slack, database
+
+
+@app.route('/', methods=['GET'])
+def hello():
+    return 'hello', 200
 
 
 @app.route('/mentions', methods=['POST'])
@@ -20,16 +25,16 @@ def respond_to_mentions():
     user = values['event']['user']
 
     if 'help' in command:
-        response = slack_bot.create_help_request()
-        slack.post_message(response, channel)
+        message_to_slack = slack_bot.create_help_request()
+        return slack.post_message(message_to_slack, channel), 200
     elif 'coins' in command:
-        response = slack_bot.get_list_of_coins()
-        slack.post_message(response, channel)
+        message_to_slack = slack_bot.get_list_of_coins()
+        return slack.post_message(message_to_slack, channel), 200
     elif 'portfolio' in command:
         data = database.get_user_portfolio(user)
         portfolio = create_portfolio(data)
-        response = slack_bot.create_portfolio(portfolio)
-        slack.post_ephemeral(response, channel, user)
+        message_to_slack = slack_bot.create_portfolio(portfolio)
+        return slack.post_ephemeral(message_to_slack, channel, user), 200
 
     return '', 204
 
@@ -51,6 +56,7 @@ def respond_to_actions():
 
 @app.route('/portfolio', methods=['POST', 'GET'])
 def add_to_portfolio():
+    values = request
 
     user = request.form.get('user_id')
     text = request.form.get('text', None)
@@ -58,11 +64,11 @@ def add_to_portfolio():
 
     values = text.split(' ')
     coin = slack_bot.coincap.get_coin_detail(values[0].upper())
-    if not coin or not is_float(values[1]):
+    if not coin or len(values) != 2 or not is_float(values[1]):
         response = slack_bot.create_error(
             'That was not a valid portfolio entry')
         slack.post_ephemeral(response, channel, user)
-        return '', 200
+        return '', 204
 
     entry = dict(
         username=user,
