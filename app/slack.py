@@ -4,7 +4,7 @@ import json
 
 class Slack(object):
     def __init__(self):
-        self.api_token = "xoxb-296558267924-vGYJ8FyQ75ytrMk2fQNNCTUp"#json.load(open('../local.json'))['slack_api_token']
+        self.api_token = json.load(open('../local.json'))['slack_api_token']
 
     def post_to_slack(self, url, message, channel):
         """
