@@ -8,6 +8,7 @@ import unittest
 
 
 class TestCryptoBot(unittest.TestCase):
+
     def setUp(self):
         self.bot = CryptoBot()
 
@@ -31,3 +32,12 @@ class TestCryptoBot(unittest.TestCase):
         expected_error = {'response_type': 'ephemeral', 'text': 'That does not seem to be a valid ticker, try */coin* BTC'}
         invalid_coin = self.bot.handle_request_for_coin(coin)
         self.assertEqual(invalid_coin, expected_error)
+
+    def test_help_request(self):
+        help_request = self.bot.create_help_request()
+        self.assertIsNotNone(help_request['text'])
+
+    def test_get_all_coins(self):
+        coins = self.bot.get_list_of_coins(limit=10)
+        self.assertEqual(coins['attachments'][0]['title'], 'Coins and tickers')
+        self.assertIsNotNone(coins['attachments'][0]['text'], str)

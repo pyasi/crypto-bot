@@ -1,16 +1,7 @@
 from app.utils import *
 from flask import request, jsonify
 import json
-from flask import Flask
-from app.crypto_bot import CryptoBot
-from app.slack import Slack
-from app.database import Database
-
-app = Flask(__name__)
-
-slack_bot = CryptoBot()
-slack = Slack()
-database = Database('crypto_portfolio')
+from app import app, slack_bot, slack, database
 
 
 @app.route('/', methods=['GET'])
@@ -109,14 +100,3 @@ def send_coin_information():
         return '', 204
 
     return jsonify(response), 200
-
-if __name__ == "__main__":
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser()
-    parser.add_argument(
-        '-p', '--port', default=5000, type=int, help='port to listen on')
-    args = parser.parse_args()
-    port = args.port
-
-    app.run(host='0.0.0.0', port=port)
