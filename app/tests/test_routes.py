@@ -39,23 +39,23 @@ class TestRoutes(unittest.TestCase):
 
     # /portfolio route
 
-    def test_slash_command_portfolio(self):
-        data = [
-            ('trigger_id', '300570783460.96216496371.851b4c60f3a31f9857321cb5ceef8149'),
-            ('channel_id', 'D8QFT1BA6'), ('user_name', 'peewhy-chubz'),
-            ('token', 'n2AGYIKrSxZ2piTimgTokS99'), ('team_id', 'T2U6CELAX'),
-            ('channel_name', 'directmessage'),
-            ('user_id', 'U2U8FE8TE'),
-            ('team_domain', 'theboocrew'),
-            ('command', '/portfolio'),
-            ('response_url', 'https://hooks.slack.com/commands/T2U6CELAX/300702049109/9I6XHNm0r30JVFH9O3trBtcs'),
-            ('text', 'eth')
-        ]
-        response = self.app.post(
-            '/portfolio',
-            data=data,
-            content_type='application/x-www-form-urlencoded')
-        self.assertEqual(response.status_code, 200)
+    # def test_slash_command_portfolio(self):
+    #     data = [
+    #         ('trigger_id', '300570783460.96216496371.851b4c60f3a31f9857321cb5ceef8149'),
+    #         ('channel_id', 'D8QFT1BA6'), ('user_name', 'peewhy-chubz'),
+    #         ('token', 'n2AGYIKrSxZ2piTimgTokS99'), ('team_id', 'T2U6CELAX'),
+    #         ('channel_name', 'directmessage'),
+    #         ('user_id', 'U2U8FE8TE'),
+    #         ('team_domain', 'theboocrew'),
+    #         ('command', '/portfolio'),
+    #         ('response_url', 'https://hooks.slack.com/commands/T2U6CELAX/300702049109/9I6XHNm0r30JVFH9O3trBtcs'),
+    #         ('text', 'eth')
+    #     ]
+    #     response = self.app.post(
+    #         '/portfolio',
+    #         data=data,
+    #         content_type='application/x-www-form-urlencoded')
+    #     self.assertEqual(response.status_code, 200)
 
 
 # Helper methods

@@ -65,7 +65,7 @@ def respond_to_actions():
 
 @app.route('/portfolio', methods=['POST', 'GET'])
 def add_to_portfolio():
-    values = request.form
+    values = request
 
     user = request.form.get('user_id')
     text = request.form.get('text', None)
@@ -73,7 +73,7 @@ def add_to_portfolio():
 
     values = text.split(' ')
     coin = slack_bot.coincap.get_coin_detail(values[0].upper())
-    if not coin or not is_float(values[1]):
+    if not coin or len(values) != 2 or not is_float(values[1]):
         response = slack_bot.create_error(
             'That was not a valid portfolio entry')
         slack.post_ephemeral(response, channel, user)
