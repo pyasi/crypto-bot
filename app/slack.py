@@ -1,10 +1,10 @@
 import requests
 import json
-
+import os
 
 class Slack(object):
     def __init__(self):
-        self.api_token = json.load(open('../local.json'))['slack_api_token']
+        self.api_token = os.environ['SLACK_API_TOKEN']
 
     def post_to_slack(self, url, message, channel):
         """
