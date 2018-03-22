@@ -1,5 +1,7 @@
 from app.utils import *
 from flask import request, jsonify
+from threading import Thread
+import requests
 import json
 from app import app, slack_bot, slack, database
 
@@ -56,11 +58,19 @@ def respond_to_actions():
 
 @app.route('/portfolio', methods=['POST', 'GET'])
 def add_to_portfolio():
-    values = request
 
-    user = request.form.get('user_id')
-    text = request.form.get('text', None)
-    channel = request.form.get('channel_id', None)
+    worker_thread = Thread(target=process_portfiolio_command, args=[request])
+    worker_thread.run()
+
+    return (jsonify({"response_type": "in_channel"}), 200) if worker_thread.is_alive() else '', 204
+
+
+def process_portfiolio_command(value_form):
+
+    user = value_form.form.get('user_id')
+    text = value_form.form.get('text', None)
+    channel = value_form.form.get('channel_id', None)
+    response_url = value_form.form.get("response_url")
 
     if text == "":
         data = database.get_user_portfolio(user)
@@ -90,19 +100,28 @@ def add_to_portfolio():
     portfolio = create_portfolio(data)
 
     response = slack_bot.create_portfolio(portfolio)
-    return jsonify(response), 200
+    requests.post(response_url, json=response)
 
 
 @app.route('/coin', methods=['POST', 'GET'])
 def send_coin_information():
 
-    text = request.form.get('text', None).split(' ')
-    channel = request.form.get('channel_id', None)
+    worker_thread = Thread(target=process_coin_command, args=[request])
+    worker_thread.run()
+
+    return (jsonify({"response_type": "in_channel"}), 200) if worker_thread.is_alive() else '', 200
+
+
+def process_coin_command(value_form):
+
+    text = value_form.form.get('text', None).split(' ')
+    channel = value_form.form.get('channel_id', None)
+    response_url = value_form.form.get('response_url')
 
     response = slack_bot.handle_request_for_coin(text[0].upper())
 
     if len(text) > 1 and text[1] == 'public':
         slack.post_message(response, channel)
-        return '', 204
+    else:
+        requests.post(response_url, json=response)
 
-    return jsonify(response), 200
