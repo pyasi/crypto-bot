@@ -62,6 +62,12 @@ def add_to_portfolio():
     text = request.form.get('text', None)
     channel = request.form.get('channel_id', None)
 
+    if text == "":
+        data = database.get_user_portfolio(user)
+        portfolio = create_portfolio(data)
+        response = slack_bot.create_portfolio(portfolio)
+        return slack.post_ephemeral(response, channel, user)
+
     values = text.split(' ')
     coin = slack_bot.coincap.get_coin_detail(values[0].upper())
     if not coin or len(values) != 2 or not is_float(values[1]):

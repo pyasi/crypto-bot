@@ -31,7 +31,7 @@ class Slack(object):
         except KeyError:
             return
 
-    def post_message(self, message: dict, channel):
+    def post_message(self, message, channel):
         """
         Create a public post using Slack's API
 
@@ -42,7 +42,7 @@ class Slack(object):
         url = 'https://slack.com/api/chat.postMessage'
         return self.post_to_slack(url, message, channel)
 
-    def post_ephemeral(self, message: dict, channel, user):
+    def post_ephemeral(self, message, channel, user):
         """
         Create a private (ephemeral) message using Slack's API
 
