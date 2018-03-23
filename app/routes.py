@@ -13,8 +13,9 @@ def hello():
 
 @app.route('/mentions', methods=['POST'])
 def respond_to_mentions():
-
     values = request.get_json()
+    return jsonify(values['challenge'])
+
     try:
         message_type = values['event']['subtype']
         if message_type == 'bot_message':
