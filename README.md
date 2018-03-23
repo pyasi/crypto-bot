@@ -71,4 +71,4 @@ All requirements are in the requirements.txt file
 pip install -r requirements.txt
 ```
 
-
+All data is received from <a href="http://www.coincap.io">coincap.io</a>
