@@ -11,7 +11,8 @@ class Database:
         self.connection.close()
 
     def connect(self):
-        database_name = "crypto_portfolio"
+        url = urlparse.urlparse(os.environ['DATABASE_URL'])
+        database_name = url.path[1:]
         try:
             self.connection = psycopg2.connect(database=database_name)
         except psycopg2.OperationalError:
