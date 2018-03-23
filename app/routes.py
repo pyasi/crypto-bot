@@ -3,12 +3,25 @@ from flask import request, jsonify
 from threading import Thread
 import requests
 import json
+import os
 from app import app, slack_bot, slack, database
 
 
 @app.route('/', methods=['GET'])
 def hello():
     return 'hello', 200
+
+
+@app.route('/auth')
+def authorize_team():
+
+    code = request.args['code']
+    url = "https://slack.com/api/oauth.access?client_id={}&client_secret={}&code={}".format(os.environ['BOT_CLIENT_ID'], os.environ['BOT_SECRET'], code)
+    response = requests.get(url)
+    response = response.json()
+    os.environ["SLACK_API_TOKEN"] = response['bot']['bot_access_token']
+
+    return 'Auth Complete!', 200
 
 
 @app.route('/mentions', methods=['POST'])

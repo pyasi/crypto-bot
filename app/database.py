@@ -13,19 +13,24 @@ class Database:
         self.connection.close()
 
     def connect(self):
-        url = urlparse.urlparse(os.environ['DATABASE_URL'])
-        database_name = url.path[1:]
-        user = url.username
-        password = url.password
-        host = url.hostname
-        port = url.port
-
         try:
-            self.connection = psycopg2.connect(database=database_name,
-                                               user=user,
-                                               password=password,
-                                               host=host,
-                                               port=port)
+            if os.environ.get('DATABASE_URL'):
+                url = urlparse.urlparse(os.environ['DATABASE_URL'])
+                database_name = url.path[1:]
+                user = url.username
+                password = url.password
+                host = url.hostname
+                port = url.port
+                database_name = 'crypto_portfolio'
+                self.connection = psycopg2.connect(database=database_name,
+                                                   user=user,
+                                                   password=password,
+                                                   host=host,
+                                                   port=port)
+            else:
+                database_name = 'crypto_portfolio'
+                self.connection = psycopg2.connect(database=database_name)
+
         except psycopg2.OperationalError:
             pg_connection = psycopg2.connect(database="postgres")
             pg_connection.set_isolation_level(0)
