@@ -19,7 +19,9 @@ def authorize_team():
     url = "https://slack.com/api/oauth.access?client_id={}&client_secret={}&code={}".format(os.environ['BOT_CLIENT_ID'], os.environ['BOT_SECRET'], code)
     response = requests.get(url)
     response = response.json()
-    os.environ["SLACK_API_TOKEN"] = response['bot']['bot_access_token']
+    print(response['bot']['bot_access_token'])
+
+    #os.environ["SLACK_API_TOKEN"] = response['bot']['bot_access_token']
 
     return 'Auth Complete!', 200
 
