@@ -14,7 +14,7 @@ class Database:
 
     def connect(self):
         try:
-            if os.environ.get('DATABASE_URL'):
+            if os.environ.get('DATABASE_URL') is not None:
                 url = urlparse.urlparse(os.environ['DATABASE_URL'])
                 database_name = url.path[1:]
                 user = url.username
