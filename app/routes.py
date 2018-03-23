@@ -13,7 +13,7 @@ def hello():
 
 @app.route('/mentions', methods=['POST'])
 def respond_to_mentions():
-    
+
     values = request.get_json()
 
     try:
@@ -34,10 +34,9 @@ def respond_to_mentions():
         message_to_slack = slack_bot.get_list_of_coins()
         return slack.post_message(message_to_slack, channel), 200
     elif 'portfolio' in command:
-        data = database.get_user_portfolio(user)
-        portfolio = create_portfolio(data)
-        message_to_slack = slack_bot.create_portfolio(portfolio)
-        return slack.post_ephemeral(message_to_slack, channel, user), 200
+        worker_thread = Thread(target=process_portfolio, args=[user, channel])
+        worker_thread.run()
+        return (jsonify({"response_type": "in_channel"}), 200) if worker_thread.is_alive() else '', 200
 
     return '', 204
 
@@ -74,10 +73,9 @@ def process_portfiolio_command(value_form):
     response_url = value_form.form.get("response_url")
 
     if text == "":
-        data = database.get_user_portfolio(user)
-        portfolio = create_portfolio(data)
-        response = slack_bot.create_portfolio(portfolio)
-        return slack.post_ephemeral(response, channel, user)
+        process_portfolio(user, channel)
+        return
+
 
     values = text.split(' ')
     coin = slack_bot.coincap.get_coin_detail(values[0].upper())
@@ -102,6 +100,13 @@ def process_portfiolio_command(value_form):
 
     response = slack_bot.create_portfolio(portfolio)
     requests.post(response_url, json=response)
+
+
+def process_portfolio(user, channel):
+    data = database.get_user_portfolio(user)
+    portfolio = create_portfolio(data)
+    response = slack_bot.create_portfolio(portfolio)
+    slack.post_ephemeral(response, channel, user)
 
 
 @app.route('/coin', methods=['POST', 'GET'])
