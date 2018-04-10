@@ -4,7 +4,7 @@ from threading import Thread
 import requests
 import json
 import os
-from app import app, slack_bot, slack, database
+from app import app, slack_bot, slack, database, token_db
 
 
 @app.route('/', methods=['GET'])
@@ -19,9 +19,12 @@ def authorize_team():
     url = "https://slack.com/api/oauth.access?client_id={}&client_secret={}&code={}".format(os.environ['BOT_CLIENT_ID'], os.environ['BOT_SECRET'], code)
     response = requests.get(url)
     response = response.json()
-    print(response['bot']['bot_access_token'])
 
-    #os.environ["SLACK_API_TOKEN"] = response['bot']['bot_access_token']
+    entry = dict(
+        team_id=response['team_id'],
+        bot_token=response['bot']['bot_access_token']
+    )
+    token_db.create_token(entry)
 
     return 'Auth Complete!', 200
 

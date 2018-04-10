@@ -52,14 +52,22 @@ class Database:
     def create_table(self):
         try:
             print("creating table " + self.table_name)
-            self.cursor().execute("CREATE TABLE " + self.table_name + ""
-                                  " ( "
-                                  "    id serial PRIMARY KEY,"
-                                  "    username varchar, "
-                                  "    coin varchar, "
-                                  "    ticker varchar, "
-                                  "    amount real"
-                                  ");")
+            if self.table_name == 'crypto_portfolio':
+                self.cursor().execute("CREATE TABLE " + self.table_name + ""
+                                      " ( "
+                                      "    id serial PRIMARY KEY,"
+                                      "    username varchar, "
+                                      "    coin varchar, "
+                                      "    ticker varchar, "
+                                      "    amount real"
+                                      ");")
+            else:
+                self.cursor().execute("CREATE TABLE " + self.table_name + ""
+                                      " ( "
+                                      "    id serial PRIMARY KEY,"
+                                      "    team_id varchar, "
+                                      "    bot_token varchar "
+                                      ");")
             self.connection.commit()
         except psycopg2.Error as e:
             print("Could not create table, error: " + e.pgerror)
@@ -73,6 +81,27 @@ class Database:
             self.connection.isolation_level
         except ConnectionError as oe:
             self.connect()
+
+    def create_token(self, values):
+        """
+
+        :param values:
+        :return:
+        """
+        self.ensure_connected()
+        add_row = (
+            "INSERT INTO {}(team_id, bot_token) VALUES('{}', '{}');".
+            format(self.table_name, values['team_id'], values['bot_token']))
+        self.cursor().execute(add_row, values)
+        self.connection.commit()
+
+    def get_token_for_team(self, team_id):
+        self.ensure_connected()
+        cursor = self.cursor()
+        cursor.execute(
+            "SELECT bot_token FROM {} where team_id = '{}';".
+            format(self.table_name, team_id))
+        return cursor.fetchall()
 
     def enter_coin(self, values):
         """

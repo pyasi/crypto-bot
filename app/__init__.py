@@ -8,5 +8,6 @@ app = Flask(__name__)
 slack_bot = CryptoBot()
 slack = Slack()
 database = Database('crypto_portfolio')
+token_db = Database('tokens')
 
 from app import routes
