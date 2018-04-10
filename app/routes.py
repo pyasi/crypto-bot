@@ -31,7 +31,7 @@ def authorize_team():
 
 @app.route('/mentions', methods=['POST'])
 def respond_to_mentions():
-
+    #https://crypto-bot-app.herokuapp.com/mentions
     values = request.get_json()
 
     try:
@@ -44,15 +44,17 @@ def respond_to_mentions():
     command = values['event']['text'].lower()
     channel = values['event']['channel']
     user = values['event']['user']
+    team_id = values['team_id']
+    token = get_team_token(team_id)
 
     if 'help' in command:
         message_to_slack = slack_bot.create_help_request()
-        return slack.post_message(message_to_slack, channel), 200
+        return slack.post_message(message_to_slack, channel, token), 200
     elif 'coins' in command:
         message_to_slack = slack_bot.get_list_of_coins()
-        return slack.post_message(message_to_slack, channel), 200
+        return slack.post_message(message_to_slack, channel, token), 200
     elif 'portfolio' in command:
-        worker_thread = Thread(target=process_portfolio, args=[user, channel])
+        worker_thread = Thread(target=process_portfolio, args=[user, channel, token])
         worker_thread.run()
         return (jsonify({"response_type": "in_channel"}), 200) if worker_thread.is_alive() else '', 200
 
@@ -66,10 +68,12 @@ def respond_to_actions():
     #original_message = values['original_message']
     channel = values['channel']['id']
     time_stamp = values['message_ts']
+    team_id = values['team_id']
+    token = get_team_token(team_id)
 
     if values['actions'][0]['value'] == 'publish':
         #original_message['response_type'] == 'in_channel'
-        slack.update_message(time_stamp, channel)
+        slack.update_message(time_stamp, channel, token)
 
     return '', 204
 
@@ -89,6 +93,8 @@ def process_portfiolio_command(value_form):
     text = value_form.form.get('text', None)
     channel = value_form.form.get('channel_id', None)
     response_url = value_form.form.get("response_url")
+    team_id = value_form.form.get('team_id')
+    token = get_team_token(team_id)
 
     if text == "":
         process_portfolio(user, channel)
@@ -100,7 +106,7 @@ def process_portfiolio_command(value_form):
     if not coin or len(values) != 2 or not is_float(values[1]):
         response = slack_bot.create_error(
             'That was not a valid portfolio entry')
-        slack.post_ephemeral(response, channel, user)
+        slack.post_ephemeral(response, channel, user, token)
         return '', 204
 
     entry = dict(
@@ -120,11 +126,11 @@ def process_portfiolio_command(value_form):
     requests.post(response_url, json=response)
 
 
-def process_portfolio(user, channel):
+def process_portfolio(user, channel, token):
     data = database.get_user_portfolio(user)
     portfolio = create_portfolio(data)
     response = slack_bot.create_portfolio(portfolio)
-    slack.post_ephemeral(response, channel, user)
+    slack.post_ephemeral(response, channel, user, token)
 
 
 @app.route('/coin', methods=['POST', 'GET'])
@@ -141,11 +147,17 @@ def process_coin_command(value_form):
     text = value_form.form.get('text', None).split(' ')
     channel = value_form.form.get('channel_id', None)
     response_url = value_form.form.get('response_url')
+    team_id = value_form.form.get('team_id')
+    token = get_team_token(team_id)
 
     response = slack_bot.handle_request_for_coin(text[0].upper())
 
     if len(text) > 1 and text[1] == 'public':
-        slack.post_message(response, channel)
+        slack.post_message(response, channel, token)
     else:
         requests.post(response_url, json=response)
+
+
+def get_team_token(team_id):
+    return token_db.get_token_for_team(team_id)
 

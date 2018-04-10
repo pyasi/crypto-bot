@@ -101,7 +101,9 @@ class Database:
         cursor.execute(
             "SELECT bot_token FROM {} where team_id = '{}';".
             format(self.table_name, team_id))
-        return cursor.fetchall()
+        for value in cursor.fetchone():
+            token = value
+        return token
 
     def enter_coin(self, values):
         """

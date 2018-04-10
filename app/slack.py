@@ -2,11 +2,10 @@ import requests
 import json
 import os
 
-class Slack(object):
-    def __init__(self):
-        self.api_token = os.environ['SLACK_API_TOKEN']
 
-    def post_to_slack(self, url, message, channel):
+class Slack(object):
+
+    def post_to_slack(self, url, message, channel, token):
         """
         Generic method to post any given content to slack
 
@@ -17,7 +16,7 @@ class Slack(object):
         """
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer {}".format(self.api_token)
+            "Authorization": "Bearer {}".format(token)
         }
         message['channel'] = channel
         response = requests.post(
@@ -31,7 +30,7 @@ class Slack(object):
         except KeyError:
             return
 
-    def post_message(self, message, channel):
+    def post_message(self, message, channel, token):
         """
         Create a public post using Slack's API
 
@@ -40,9 +39,9 @@ class Slack(object):
         :return: timestamp of message
         """
         url = 'https://slack.com/api/chat.postMessage'
-        return self.post_to_slack(url, message, channel)
+        return self.post_to_slack(url, message, channel, token)
 
-    def post_ephemeral(self, message, channel, user):
+    def post_ephemeral(self, message, channel, user, token):
         """
         Create a private (ephemeral) message using Slack's API
 
@@ -52,7 +51,7 @@ class Slack(object):
         """
         url = 'https://slack.com/api/chat.postEphemeral'
         message['user'] = user
-        return self.post_to_slack(url, message, channel)
+        return self.post_to_slack(url, message, channel, token)
 
     def update_message(self, message, time_stamp, channel):
         """
