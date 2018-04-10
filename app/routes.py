@@ -31,11 +31,9 @@ def authorize_team():
 
 @app.route('/mentions', methods=['POST'])
 def respond_to_mentions():
-    #https://crypto-bot-app.herokuapp.com/mentions
+
     values = request.get_json()
 
-    return values['challenge'], 200
-    
     try:
         message_type = values['event']['subtype']
         if message_type == 'bot_message':
