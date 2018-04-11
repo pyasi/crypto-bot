@@ -1,5 +1,5 @@
 # crypto-bot
-Crypto currency slackbot for getting info and storing your own portfolio
+Crypto currency bot for getting info and storing your own portfolio
 
 ### Installation
 
@@ -7,12 +7,12 @@ Crypto currency slackbot for getting info and storing your own portfolio
 
 ## Functions
 
-This slackbot gives you the ability to view current data on all coins, as well as maintain your own personal crypto portfolio.
+This bot gives you the ability to view current data on all coins, as well as maintain your own personal crypto portfolio.
 
  - Query the status of a coin to get all current information using slash commands
  - Add to and view your own portfolio
  - List all coins and their tickers
- - Ability to interact with the bot via slash commans, @mentions, or direct messages with the bot
+ - Ability to interact with the bot via slash commands, @mentions, or direct messages with the bot
  
  
 ## Examples
@@ -63,12 +63,12 @@ This slackbot gives you the ability to view current data on all coins, as well a
  
 ![Alt text](screenshots/Help-menu.png "Help Menu")
 
-### Prerequisites
+### Support
 
-All requirements are in the requirements.txt file
+Please feel free to email with feedback, questions, or anything on your mind!
 
 ```
-pip install -r requirements.txt
+cryptoportfoliobot@gmail.com
 ```
 
 
