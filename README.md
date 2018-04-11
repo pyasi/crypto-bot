@@ -71,4 +71,4 @@ Please feel free to email with feedback, questions, or anything on your mind!
 cryptoportfoliobot@gmail.com
 ```
 
-
+All data is received from <a href="http://www.coincap.io">coincap.io</a>
