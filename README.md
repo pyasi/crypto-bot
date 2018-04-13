@@ -72,3 +72,12 @@ cryptoportfoliobot@gmail.com
 ```
 
 All data is received from <a href="http://www.coincap.io">coincap.io</a>
+
+
+### Privacy Policy
+
+We will not be held responsible for any issues that arise due to the use of this service. This service does not make any guarantees of its accuracy. No data of yours will be shared with any party. If you do not agree to all of the terms, including these, then please do not use this service.
+
+All rights reserved.
+
+Privacy Policy | Terms of Use
